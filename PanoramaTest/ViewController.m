@@ -7,8 +7,15 @@
 //
 
 #import "ViewController.h"
+#import "GVRPanoramaView.h"
 
-@interface ViewController ()
+static const CGFloat kMargin = 16;
+static const CGFloat kPanoViewHeight = 250;
+
+@interface ViewController ()<GVRWidgetViewDelegate>
+
+@property (nonatomic, strong) GVRPanoramaView *panoView;
+@property (nonatomic, strong) UIScrollView *scrollView;
 
 @end
 
@@ -16,8 +23,40 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    
+    _scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
+    _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    //[self.view addSubview:_scrollView];
+    
+    _panoView = [[GVRPanoramaView alloc] init];
+    _panoView.userInteractionEnabled = YES;
+    _panoView.delegate = self;
+    _panoView.enableFullscreenButton = YES;
+    _panoView.enableCardboardButton = YES;
+    _panoView.enableTouchTracking = YES;
+    [_panoView loadImage:[UIImage imageNamed:@"andes.jpg"]
+                  ofType:kGVRPanoramaImageTypeStereoOverUnder];
+    [self.view addSubview:_panoView];
+
+    
 }
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    
+    _panoView.frame = CGRectMake(kMargin,20,
+                                 CGRectGetWidth(self.view.bounds) - 2 * kMargin,
+                                 kPanoViewHeight);
+    
+}
+
+- (void)setFrameForView:(UIView *)view belowView:(UIView *)topView margin:(CGFloat)margin {
+    CGSize size =
+    [view sizeThatFits:CGSizeMake(CGRectGetWidth(self.view.bounds) - 2 * kMargin, CGFLOAT_MAX)];
+    view.frame = CGRectMake(kMargin, CGRectGetMaxY(topView.frame) + margin, size.width, size.height);
+}
+
+
 
 
 - (void)didReceiveMemoryWarning {
